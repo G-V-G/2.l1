@@ -1,0 +1,18 @@
+go_tested_binary {
+  // Module (and output) name.
+  name: "greet",
+
+  // Go package to build.
+  pkg: "github.com/G-V-G/2.l1/example",
+
+  // Build inputs.
+  srcs: ["**/*.go", "../go.mod"],
+
+  testPkg: "github.com/G-V-G/2.l1/example/greeting",
+
+  testSrcs: ["**/*_test.go"]
+}
+archive_bin {
+ name: "greetArch",
+ binary: "greet"
+}
