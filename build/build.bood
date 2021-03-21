@@ -3,7 +3,7 @@ go_tested_binary {
   name: "bood",
 
   // Go package to build.
-  pkg: "github.com/roman-mazur/design-practice-1-template/build/cmd/bood",
+  pkg: "github.com/G-V-G/2.l1/build/cmd/bood",
 
   // Build inputs.
   srcs: ["**/*.go", "../go.mod"],
@@ -11,4 +11,8 @@ go_tested_binary {
   testPkg: "github.com/G-V-G/2.l1/build/gomodule",
 
   testSrcs: ["**/*_test.go"]
+}
+archive_bin {
+ name: "boodArch",
+ binary: "bood"
 }
