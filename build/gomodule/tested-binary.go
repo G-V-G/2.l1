@@ -12,7 +12,7 @@ var (
 	goBuild = pctx.StaticRule("binaryBuild", blueprint.RuleParams{
 		Command:     "cd $workDir && go build -o $outputPath $pkg",
 		Description: "build go command $pkg",
-	}, "workDir", "outputPath", "pkg", "dyndep")
+	}, "workDir", "outputPath", "pkg")
 
 	// Ninja rule to execute go mod vendor.
 	goVendor = pctx.StaticRule("vendor", blueprint.RuleParams{
@@ -61,7 +61,6 @@ func (gb *goTestedBinaryModuleType) GenerateBuildActions(ctx blueprint.ModuleCon
 
 	outputPath := path.Join(config.BaseOutputDir, "bin", name)
 	outputTestPath := path.Join(config.BaseOutputDir, "test", name + ".log")
-	ddPath := path.Join(config.BaseOutputDir, "archiveDeps.dd")
 
 	var inputs []string
 	inputErors := false
@@ -119,12 +118,11 @@ func (gb *goTestedBinaryModuleType) GenerateBuildActions(ctx blueprint.ModuleCon
 		Description: fmt.Sprintf("Build %s as Go binary", name),
 		Rule:        goBuild,
 		Outputs:     []string{outputPath},
-		Implicits:   append(inputs, ddPath),
+		Implicits:   append(inputs),
 		Args: map[string]string{
 			"outputPath": outputPath,
 			"workDir":    ctx.ModuleDir(),
 			"pkg":        gb.properties.Pkg,
-			"dyndep":			ddPath,
 		},
 	})	
 }

@@ -13,12 +13,7 @@ var (
   goArchive = pctx.StaticRule("archiveBuild", blueprint.RuleParams{
     Command:     "cd $workDir && zip -FSj $name $binary",
     Description: "archive binary $name",
-  }, "workDir", "name", "binary", "dyndep")
-
-	ddBuilder = pctx.StaticRule("dyndepBuild", blueprint.RuleParams{
-    Command: `cd $workDir && printf 'ninja_dyndep_version = 1\nbuild $binary: dyndep\nbuild $archive: dyndep | $binary\n\n\n' > out/archiveDeps.dd`,
-		Description: "create dyndep file archiveDeps.dd",
-	}, "workDir", "binary", "archive")
+  }, "workDir", "name", "binary")
 )
 
 // goTestedBinaryModuleType implements the simplest Go binary build with running tests for the target Go package.
@@ -43,7 +38,6 @@ func (ab *goArchiveBinaryModuleType) GenerateBuildActions(ctx blueprint.ModuleCo
 
 	outputPath := path.Join(config.BaseOutputDir, "archives", ab.properties.Name)
 	inputPath := path.Join(config.BaseOutputDir, "bin", ab.properties.Binary)
-	ddPath := path.Join(config.BaseOutputDir, "archiveDeps.dd")
 
 	var binaryInput []string
 	if matches, err := ctx.GlobWithDeps(inputPath, make([]string, 0)); err == nil {
@@ -53,7 +47,7 @@ func (ab *goArchiveBinaryModuleType) GenerateBuildActions(ctx blueprint.ModuleCo
 		return
 	}
 
-	binaryInput = append(binaryInput, ddPath)
+	binaryInput = append(binaryInput)
 
 	ctx.Build(pctx, blueprint.BuildParams{
 		Description: fmt.Sprintf("Archive binary %s to zip %s", ab.properties.Binary, ab.properties.Name),
@@ -64,19 +58,6 @@ func (ab *goArchiveBinaryModuleType) GenerateBuildActions(ctx blueprint.ModuleCo
 			"workDir": ctx.ModuleDir(),
 			"name": outputPath,
 			"binary": inputPath,
-			"dyndep": ddPath,
-		},
-	})
-
-	ctx.Build(pctx, blueprint.BuildParams{
-		Description: fmt.Sprintf("Build dyndep file"),
-		Rule: ddBuilder,
-		Outputs: []string{ddPath},
-		Implicits: make([]string, 0),
-		Args: map[string]string{
-			"workDir": ctx.ModuleDir(),
-			"binary": inputPath,
-			"archive": outputPath,
 		},
 	})
 }
