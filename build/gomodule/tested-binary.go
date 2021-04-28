@@ -43,11 +43,13 @@ type goTestedBinaryModuleType struct {
 		SrcsExclude []string
 		// If to call vendor command.
 		VendorFirst bool
+		// Optional execution.
+		OptionalBuild bool
+		OptionalTest bool
 
 		// Example of how to specify dependencies.
 		Deps []string
 	}
-
 }
 
 func (gb *goTestedBinaryModuleType) DynamicDependencies(blueprint.DynamicDependerModuleContext) []string {
@@ -107,6 +109,7 @@ func (gb *goTestedBinaryModuleType) GenerateBuildActions(ctx blueprint.ModuleCon
 		Rule: goTest,
 		Outputs: []string{outputTestPath},
 		Implicits: append(testInputs, inputs...),
+		Optional: gb.properties.OptionalTest,
 		Args: map[string]string{
 			"workDir": ctx.ModuleDir(),
 			"testPkg": gb.properties.TestPkg,
@@ -119,6 +122,7 @@ func (gb *goTestedBinaryModuleType) GenerateBuildActions(ctx blueprint.ModuleCon
 		Rule:        goBuild,
 		Outputs:     []string{outputPath},
 		Implicits:   append(inputs),
+		Optional: gb.properties.OptionalBuild,
 		Args: map[string]string{
 			"outputPath": outputPath,
 			"workDir":    ctx.ModuleDir(),
